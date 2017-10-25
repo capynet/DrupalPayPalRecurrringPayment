@@ -6,6 +6,7 @@ paypal_sdk.store:
   requirements:
     _permission: 'access administration pages'
 
+# Catches the paypal response.
 paypal_sdk.process_response:
   path: '/paypal/subscribe/response/process'
   defaults:
@@ -14,6 +15,7 @@ paypal_sdk.process_response:
   requirements:
     _permission: 'subscribe paypal products'
 
+# Catches the paypal response when the user do not accept the agreement.
 paypal_sdk.process_cancelled_response:
   path: '/paypal/subscribe/response/cancelled'
   defaults:
