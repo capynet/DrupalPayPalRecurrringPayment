@@ -1,6 +1,6 @@
 parameters:
-  billing_agreement.credentials.client_id: 'AVqaqqDz_q-d-nDxq-trvL9LZMU_hgurXxGQLlzEXOkb_azz2HDLjrUIXGw8xhx_AhxPVp6TgHtaU4yW'
-  billing_agreement.credentials.client_secret: 'EKkmmkDfLl895_Npn8W03CtwBPsgBmwC6zkMHGxrZliFDYmivpkzj7SFh3bZXdGaUU1omD89lnhKAPd0'
+  billing_agreement.credentials.client_id: 'completar'
+  billing_agreement.credentials.client_secret: 'completar'
 
 services:
   paypal.billing.agreement:
