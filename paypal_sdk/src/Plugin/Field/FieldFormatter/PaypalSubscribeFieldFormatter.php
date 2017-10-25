@@ -101,6 +101,7 @@ class PaypalSubscribeFieldFormatter extends FormatterBase {
         Url::fromUri($url, array(
           'absolute' => TRUE,
           'attributes' => array(
+            'target' => '_blank',
             'class' => array('paypal-subscribe-link')
           )
         )))->toRenderable();

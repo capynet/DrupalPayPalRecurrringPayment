@@ -4,7 +4,6 @@ namespace Drupal\paypal_sdk\Services;
 
 use Drupal;
 use Drupal\Core\Url;
-use Drupal\paypal_sdk\Entity\PayPalBillingPlanEntity;
 use PayPal\Api\Agreement;
 use PayPal\Api\ChargeModel;
 use PayPal\Api\Currency;
@@ -47,7 +46,6 @@ class BillingAgreement {
   /**
    * Creates a plan.
    *
-   * @param PayPalBillingPlanEntity $entity @todo should be a more generic object?
    * @return bool|\PayPal\Api\Plan $plan
    */
   public function createPlan($data) {
@@ -196,7 +194,7 @@ class BillingAgreement {
    *  }
    *
    * @param array $options @todo meter en las opciones la posibilidad de especificar el state del listado que queremos por ejemplo. O el page_size, etc.
-   * @return \PayPal\Api\PlanList
+   * @return \PayPal\Api\PlanList|boolean
    */
   public function getAllPlans($options = []) {
 
@@ -244,31 +242,11 @@ class BillingAgreement {
    * @return bool|null|string
    */
   function getUserAgreementLink($plan_id) {
-    // Get the rellated entity
-    // @todo move to a method
-    $query = Drupal::entityQuery('pay_pal_billing_plan_entity');
-    $query->condition('field_id', $plan_id, '=');
-    $result = $query->execute();
-
-    if (!$result) {
-      // @todo lanzar un error
-    }
-
-    $node_storage = Drupal::entityTypeManager()->getStorage('pay_pal_billing_plan_entity');
-    $entity = $node_storage->load(reset($result));
-    $field_start_date_value = $entity->get('field_start_date')->value;
-
     $originalPlan = $this->getPlan($plan_id);
 
-    // Time to compare dates
+    // @fixme Since the start date is required at the "plan form" but really is not part of a paypal plan we need to figure out how to catch this value from a plan to use it here because the agreement is who really needs a starting date. Maybe we can save this start day on the plan as a "extra data"?
     $utcTimezone = new \DateTimeZone('UTC');
-    $dateTimeNow = new \DateTime('NOW', $utcTimezone);
-    $dateTimeField = new \DateTime($field_start_date_value, $utcTimezone);
-
-    $firstDate = $dateTimeNow->format('Y-m-d');
-    $secondDate = $dateTimeField->format('Y-m-d');
-
-    $start_date = ($firstDate == $secondDate) ? $dateTimeNow : $dateTimeField;
+    $start_date = new \DateTime('NOW', $utcTimezone);
 
     // We can not mark the start date with "NOW", so we move ti forward a few minutes.
     $start_date->modify('+10 minutes');

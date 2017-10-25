@@ -25,18 +25,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class PaypalSubscribeFieldWidget extends WidgetBase {
 
-  /**
-   * The entity query factory.
-   *
-   * @var \Drupal\Core\Entity\Query\QueryFactoryInterface
-   */
-  protected $entityPlans;
+  /** @var BillingAgreement $pba */
+  protected $pba;
 
   public function __construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings) {
-    $this->entityPlans = \Drupal::entityQuery('pay_pal_billing_plan_entity');
-    $this->entityPlans->condition('field_id', '', '<>');
-
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
+    /** @var BillingAgreement $pba */
+    $this->pba = \Drupal::service('paypal.billing.agreement');
   }
 
 
@@ -68,12 +63,6 @@ class PaypalSubscribeFieldWidget extends WidgetBase {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
 
-    /**
-     * @var $query \Drupal\Core\Entity\Query\QueryInterface
-     */
-    $query = $this->entityPlans;
-    $plan_ids = $query->execute();
-
     $options = ['' => 'none'];
     $cache = \Drupal::cache();
 
@@ -82,16 +71,11 @@ class PaypalSubscribeFieldWidget extends WidgetBase {
       $options = $cache->get('paypal_sdk_options_list')->data;
     }
     else {
-      foreach ($plan_ids as $entity_id) {
-        $etm = \Drupal::entityTypeManager()->getStorage('pay_pal_billing_plan_entity');
-        /** @var BillingAgreement $pba */
-        $pba = \Drupal::service('paypal.billing.agreement');
+      $planList = $this->pba->getAllPlans(['status' => 'ACTIVE']);
 
-        $entity = $etm->load($entity_id);
-        $plan_id = $entity->get('field_id')->value;
-
-        $realPlan = $pba->getPlan($plan_id);
-        $options[$plan_id] = $realPlan->getName();
+      /** @var $plan \PayPal\Api\Plan */
+      foreach ($planList->getPlans() as $k => $plan) {
+        $options[$plan->getId()] = $plan->getName();
       }
 
       $cache->set('paypal_sdk_options_list', $options);
