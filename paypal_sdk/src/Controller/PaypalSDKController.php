@@ -172,6 +172,7 @@ class PaypalSDKController extends ControllerBase {
           break;
 
         case BillingAgreement::PLAN_INACTIVE:
+        case BillingAgreement::PLAN_CREATED:
           $table['contacts'][$k]['operations']['#links']['active'] = [
             'title' => t('Activate'),
             'url' => Url::fromRoute('paypal_sdk.plan_update_status_form', ['plan_id' => $plan->getId(), 'status' => BillingAgreement::PLAN_ACTIVE])
