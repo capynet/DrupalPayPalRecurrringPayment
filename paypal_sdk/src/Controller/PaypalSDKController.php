@@ -92,7 +92,7 @@ class PaypalSDKController extends ControllerBase {
       '#tables' => [
         'created' => $this->getPlanTableList(['status' => 'CREATED']),
         'active' => $this->getPlanTableList(['status' => 'ACTIVE']),
-        //'inactive' => $this->getPlanTableList(['status' => 'INACTIVE'])
+        'inactive' => $this->getPlanTableList(['status' => 'INACTIVE'])
       ],
     );
 
@@ -125,7 +125,7 @@ class PaypalSDKController extends ControllerBase {
     }
 
     foreach ($planList->getPlans() as $k => $plan) {
-
+      /** @var \PayPal\Api\Plan $plan */
 
       $table['contacts'][$k]['name'] = array(
         '#type' => 'markup',
@@ -161,6 +161,23 @@ class PaypalSDKController extends ControllerBase {
         ],
       );
 
+      // Set actions depending on plan status.
+      switch ($plan->getState()) {
+        case BillingAgreement::PLAN_ACTIVE:
+          $table['contacts'][$k]['operations']['#links']['inactive'] = [
+              'title' => t('Desactivate'),
+              'url' => Url::fromRoute('paypal_sdk.plan_update_status_form', ['plan_id' => $plan->getId(), 'status' => BillingAgreement::PLAN_INACTIVE])
+            ];
+
+          break;
+
+        case BillingAgreement::PLAN_INACTIVE:
+          $table['contacts'][$k]['operations']['#links']['active'] = [
+            'title' => t('Activate'),
+            'url' => Url::fromRoute('paypal_sdk.plan_update_status_form', ['plan_id' => $plan->getId(), 'status' => BillingAgreement::PLAN_ACTIVE])
+          ];
+          break;
+      }
     }
 
     return $table;

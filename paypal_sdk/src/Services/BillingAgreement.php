@@ -26,6 +26,12 @@ use PayPal\Rest\ApiContext;
  */
 class BillingAgreement {
 
+  const PLAN_ACTIVE = 'ACTIVE';
+
+  const PLAN_INACTIVE = 'INACTIVE';
+
+  const PLAN_CREATED = 'CREATED';
+
   private $apiContext;
 
   /**
