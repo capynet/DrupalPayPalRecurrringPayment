@@ -2,8 +2,8 @@
 
 namespace Drupal\paypal_sdk\Services;
 
-use Drupal;
 use Drupal\Core\Url;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use PayPal\Api\Agreement;
 use PayPal\Api\ChargeModel;
 use PayPal\Api\Currency;
@@ -32,18 +32,15 @@ class BillingAgreement {
   const PLAN_CREATED = 'CREATED';
 
   private $apiContext;
+  private $configFactory;
 
-  /**
-   * Constructor.
-   * @param string $clientId
-   * @param string $clientSecret
-   */
-  public function __construct($clientId, $clientSecret) {
+
+  public function __construct(ConfigFactoryInterface $config_factory) {
     $this->apiContext = &drupal_static(__FUNCTION__, FALSE);
-
+    $this->configFactory = $config_factory;
     if (!$this->apiContext) {
       $this->apiContext = new ApiContext(
-        new OAuthTokenCredential($clientId, $clientSecret)
+        new OAuthTokenCredential($this->config_factory->get('config.paypal_credentials')->get('client_id'), $this->config_factory->get('config.paypal_credentials')->get('client_secret'))
       );
     }
 
