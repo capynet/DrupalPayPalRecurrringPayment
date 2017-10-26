@@ -40,7 +40,7 @@ class BillingAgreement {
     $this->configFactory = $config_factory;
     if (!$this->apiContext) {
       $this->apiContext = new ApiContext(
-        new OAuthTokenCredential($this->config_factory->get('config.paypal_credentials')->get('client_id'), $this->config_factory->get('config.paypal_credentials')->get('client_secret'))
+        new OAuthTokenCredential($this->configFactory->get('config.paypal_credentials')->get('client_id'), $this->configFactory->get('config.paypal_credentials')->get('client_secret'))
       );
     }
 
