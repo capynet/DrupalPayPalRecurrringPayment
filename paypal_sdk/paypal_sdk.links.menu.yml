@@ -12,3 +12,11 @@ paypal_sdk_plan_list:
   description: 'List PayPal billing plans'
   parent: paypal_sdk.store
   weight: 100
+
+# Paypal Configuration
+paypal_sdk.config:
+ route_name: paypal_sdk.config.form
+ parent: system.admin_config_system
+ description: 'Configure Paypal'
+ title: Paypal SDK
+ weight: 0
