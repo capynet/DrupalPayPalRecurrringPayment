@@ -59,17 +59,17 @@ class PaypalSDKController extends ControllerBase {
     $utcTimezone = new \DateTimeZone('UTC');
 
     // Create a drupal entity with the agreement.
-    $entityBillingAgreement = PayPalBillingAgreement::create([
-      'name' => $agreement->getDescription(),
-      'user_id' => $user->id(),
-      'field_paypal_agreement_id' => $agreement->getId(),
-      'field_agreement_final_payment' => (new \DateTime($agreement->getAgreementDetails()->getFinalPaymentDate(), $utcTimezone))->format('Y-m-d'),
-      'field_agreement_next_billing' => (new \DateTime($agreement->getAgreementDetails()->getNextBillingDate(), $utcTimezone))->format('Y-m-d'),
-      'field_agreement_completed_cycles' => $agreement->getAgreementDetails()->getCyclesCompleted(),
-      'field_agreement_remaining_cycles' => $agreement->getAgreementDetails()->getCyclesRemaining(),
-    ]);
-
-    $entityBillingAgreement->save();
+//    $entityBillingAgreement = PayPalBillingAgreement::create([
+//      'name' => $agreement->getDescription(),
+//      'user_id' => $user->id(),
+//      'field_paypal_agreement_id' => $agreement->getId(),
+//      'field_agreement_final_payment' => (new \DateTime($agreement->getAgreementDetails()->getFinalPaymentDate(), $utcTimezone))->format('Y-m-d'),
+//      'field_agreement_next_billing' => (new \DateTime($agreement->getAgreementDetails()->getNextBillingDate(), $utcTimezone))->format('Y-m-d'),
+//      'field_agreement_completed_cycles' => $agreement->getAgreementDetails()->getCyclesCompleted(),
+//      'field_agreement_remaining_cycles' => $agreement->getAgreementDetails()->getCyclesRemaining(),
+//    ]);
+//
+//    $entityBillingAgreement->save();
     return $this->redirect('<front>');
 
 // Debug
