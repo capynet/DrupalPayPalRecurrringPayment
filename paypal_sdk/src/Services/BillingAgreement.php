@@ -130,6 +130,11 @@ class BillingAgreement {
       $patchRequest = new PatchRequest();
       $patchRequest->addPatch($patch);
       $plan->update($patchRequest, $this->apiContext);
+
+      // Crear Paypal SDK cache.
+      $cache = \Drupal::cache();
+      $cache->invalidate('paypal_sdk_options_list');
+
       return TRUE;
 
     } catch (\Exception $e) {
@@ -230,6 +235,11 @@ class BillingAgreement {
 
     try {
       $plan->delete($this->apiContext);
+
+      // Crear Paypal SDK cache.
+      $cache = \Drupal::cache();
+      $cache->invalidate('paypal_sdk_options_list');
+
       return TRUE;
     } catch (\Exception $e) {
       drupal_set_message($e->getMessage(), "error");
