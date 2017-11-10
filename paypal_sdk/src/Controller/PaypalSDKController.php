@@ -5,12 +5,20 @@ namespace Drupal\paypal_sdk\Controller;
 use Drupal;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
-use Drupal\paypal_sdk\Entity\PayPalBillingAgreement;
 use Drupal\paypal_sdk\Services\BillingAgreement;
 use Drupal\user\Entity\User;
+use PayPal\Api\Agreement;
 
+/**
+ * Class PaypalSDKController
+ *
+ * @package Drupal\paypal_sdk\Controller
+ */
 class PaypalSDKController extends ControllerBase {
 
+  /**
+   * @return mixed
+   */
   public function processResponse() {
     $request = Drupal::request();
     $token = $request->get('token');
@@ -24,16 +32,16 @@ class PaypalSDKController extends ControllerBase {
     /** @var \PayPal\Api\Payer $payer */
     $payer = $agreement->getPayer();
 
-    /*
-     * If the current user is anonymous and the email does not exist on any user, create a new account.
-     */
+
+    // If the current user is anonymous and the email does not exist on any user, create a new account.
+
     if (Drupal::currentUser()->isAnonymous()) {
 
       // The email (user) already exist?
       $existingUser = user_load_by_mail($payer->getPayerInfo()->getEmail());
 
       if (!$existingUser) {
-        // Si el usuario no existe lo creamos.
+        // If user does not exists, create a new one.
         $user = User::create();
         $user->set("init", 'mail');
         $user->enforceIsNew();
@@ -56,20 +64,14 @@ class PaypalSDKController extends ControllerBase {
       $user = Drupal::currentUser();
     }
 
-    $utcTimezone = new \DateTimeZone('UTC');
+    // Append new agreement.
+    $agreementMapping = $this->config('config.paypal_mapping')->get('mapping');
+    $plan_id = $agreement->getDescription();
+    list($entity,$agreementField) = explode('-',$agreementMapping[$plan_id]);
+    $userEntity = User::load($user->id());
+    $userEntity->{$agreementField}->appendItem($agreement->getId());
 
-    // Create a drupal entity with the agreement.
-//    $entityBillingAgreement = PayPalBillingAgreement::create([
-//      'name' => $agreement->getDescription(),
-//      'user_id' => $user->id(),
-//      'field_paypal_agreement_id' => $agreement->getId(),
-//      'field_agreement_final_payment' => (new \DateTime($agreement->getAgreementDetails()->getFinalPaymentDate(), $utcTimezone))->format('Y-m-d'),
-//      'field_agreement_next_billing' => (new \DateTime($agreement->getAgreementDetails()->getNextBillingDate(), $utcTimezone))->format('Y-m-d'),
-//      'field_agreement_completed_cycles' => $agreement->getAgreementDetails()->getCyclesCompleted(),
-//      'field_agreement_remaining_cycles' => $agreement->getAgreementDetails()->getCyclesRemaining(),
-//    ]);
-//
-//    $entityBillingAgreement->save();
+    $userEntity->save();
     return $this->redirect('<front>');
 
 // Debug
@@ -77,14 +79,21 @@ class PaypalSDKController extends ControllerBase {
 //      '#markup' => '<pre>' . $agreement->toJSON(JSON_PRETTY_PRINT) . '</pre>',
 //    );
 
-
   }
 
+  /**
+   * Cancel Response.
+   * @return mixed
+   */
   public function cancelledResponse() {
     drupal_set_message(t('Your subscription has been cancelled.'));
     return $this->redirect('<front>');
   }
 
+  /**
+   * Fuction to redner the billing plan list.
+   * @return array
+   */
   public function billingPlanList() {
 
     $build = array(
@@ -100,6 +109,7 @@ class PaypalSDKController extends ControllerBase {
   }
 
   /**
+   * Get Plan list table by status.
    * @param $status_list_options
    * @return mixed
    */
@@ -185,4 +195,118 @@ class PaypalSDKController extends ControllerBase {
   }
 
 
+  /**
+   * Fuction to redner the Agreements list.
+   * @return array
+   */
+  public function AgreementsList() {
+    //TODO: We must check which status should be displayed.
+    $build = array(
+      '#theme' => 'agreement_list_tables',
+      '#tables' => [
+//        'created' => $this->getPlanTableList(['status' => 'CREATED']),
+        'active' => $this->getAgreementsTableList(['status' => 'ACTIVE']),
+//        'inactive' => $this->getPlanTableList(['status' => 'INACTIVE'])
+      ],
+    );
+
+    return $build;
+  }
+
+  /**
+   * @param $status_list_options
+   * @return mixed
+   */
+  public function getAgreementsTableList($status_list_options) {
+    /** @var BillingAgreement $pba */
+    $pba = Drupal::service('paypal.billing.agreement');
+    $agreementList = $pba->getAllAgreements($status_list_options);
+
+
+    $table['contacts'] = array(
+      '#type' => 'table',
+      '#header' => [
+        $this->t('Name'),
+        $this->t('Description'),
+        $this->t('Agreement ID'),
+        $this->t('State'),
+        $this->t('Start Date'),
+        $this->t('Plan'),
+        $this->t('Operations'),
+      ],
+    );
+
+    if (count($agreementList) == 0) {
+      return $table;
+    }
+
+    foreach ($agreementList as $k => $agreement) {
+      /** @var \PayPal\Api\Agreement  $agreement */
+
+      $table['contacts'][$k]['name'] = array(
+        '#type' => 'markup',
+        '#markup' => $agreement->getName()
+      );
+
+      $table['contacts'][$k]['desc'] = array(
+        '#type' => 'markup',
+        '#markup' => $agreement->getDescription()
+      );
+
+      $table['contacts'][$k]['agreement_id'] = array(
+        '#type' => 'markup',
+        '#markup' => $agreement->getId()
+      );
+
+      $table['contacts'][$k]['state'] = array(
+        '#type' => 'markup',
+        '#markup' => $agreement->getState()
+      );
+
+      $table['contacts'][$k]['start_date'] = array(
+        '#type' => 'markup',
+        '#markup' => $agreement->getStartDate()
+      );
+
+      $table['contacts'][$k]['plan'] = array(
+        '#type' => 'markup',
+        '#markup' => $agreement->getPlan()
+      );
+
+      $table['contacts'][$k]['operations'] = array(
+        '#type' => 'operations',
+        '#links' => [
+          'edit' => [
+            'title' => t('Edit'),
+            'url' => Url::fromRoute('paypal_sdk.agreement_edit_form', ['agreemen_id' => $agreement->getId()])
+          ],
+        ],
+      );
+
+      // Set actions depending on plan status.
+      switch ($agreement->getState()) {
+
+        case BillingAgreement::AGREEMENT_ACTIVE:
+
+          $table['contacts'][$k]['operations']['#links']['inactive'] = [
+            'title' => t('Desactivate'),
+            'url' => Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreement>getId(), 'status' => BillingAgreement::AGREEMENT_SUSPENDED])
+          ];
+
+          break;
+
+        case BillingAgreement::AGREEMENT_CANCELED:
+        case BillingAgreement::AGREEMENT_EXPIRED:
+        case BillingAgreement::AGREEMENT_PENDING:
+        case BillingAgreement::AGREEMENT_SUSPENDED:
+//          $table['contacts'][$k]['operations']['#links']['active'] = [
+//            'title' => t('Activate'),
+//            'url' => Url::fromRoute('paypal_sdk.plan_update_status_form', ['plan_id' => $plan->getId(), 'status' => BillingAgreement::PLAN_ACTIVE])
+//          ];
+          break;
+      }
+    }
+
+    return $table;
+  }
 }

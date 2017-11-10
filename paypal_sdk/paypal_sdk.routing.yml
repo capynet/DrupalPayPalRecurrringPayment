@@ -1,10 +1,4 @@
-paypal_sdk.store:
-  path: '/admin/store'
-  defaults:
-    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
-    _title: 'Store'
-  requirements:
-    _permission: 'access administration pages'
+# Response routes.
 
 # Catches the paypal response.
 paypal_sdk.process_response:
@@ -24,6 +18,7 @@ paypal_sdk.process_cancelled_response:
   requirements:
     _permission: 'subscribe paypal products'
 
+# Plan routes
 paypal_sdk.billing_plan_list:
   path: '/admin/store/billing-plan/list'
   defaults:
@@ -64,6 +59,20 @@ paypal_sdk.plan_update_status_form:
   requirements:
     _permission: 'subscribe paypal products'
 
+
+# Agreements routes.
+# Agreement list.
+paypal_sdk.agreements_list:
+  path: '/admin/store/agreements/list'
+  defaults:
+    _controller: '\Drupal\paypal_sdk\Controller\PaypalSDKController::AgreementsList'
+    _title: 'Agreements list'
+  requirements:
+    _permission: 'subscribe paypal products'
+
+
+# Administration routes.
+
 # Paypal configuration form.
 paypal_sdk.config.form:
   path: '/admin/config/system/paypal-sdk'
@@ -72,3 +81,11 @@ paypal_sdk.config.form:
     _title: 'Paypal SDK'
   requirements:
     _permission: 'subscribe paypal products'
+
+paypal_sdk.store:
+  path: '/admin/store'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Store'
+  requirements:
+    _permission: 'access administration pages'

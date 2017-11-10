@@ -13,6 +13,14 @@ paypal_sdk_plan_list:
   parent: paypal_sdk.store
   weight: 100
 
+# PayPal agreements menu items definition
+paypal_sdk_agreement_list:
+  title: 'PayPal Agreements'
+  route_name: paypal_sdk.agreements_list
+  description: 'List PayPal agreements'
+  parent: paypal_sdk.store
+  weight: 100
+
 # Paypal Configuration
 paypal_sdk.config:
  route_name: paypal_sdk.config.form

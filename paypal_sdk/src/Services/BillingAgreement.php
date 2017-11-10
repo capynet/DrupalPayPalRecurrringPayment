@@ -31,6 +31,16 @@ class BillingAgreement {
 
   const PLAN_CREATED = 'CREATED';
 
+  const AGREEMENT_PENDING = 'PENDING';
+
+  const AGREEMENT_ACTIVE = 'ACTIVE';
+
+  const AGREEMENT_SUSPENDED = 'SUSPENDED';
+
+  const AGREEMENT_CANCELED = 'CANCELED';
+
+  const AGREEMENT_EXPIRED = 'EXPIRED';
+
   private $apiContext;
   private $configFactory;
 
@@ -207,8 +217,7 @@ class BillingAgreement {
   public function getAllPlans($options = []) {
 
     $params = array_merge([
-      'page_size' => 20,
-      'status' => 'CREATED'
+      'page_size' => '20',
     ], $options);
 
     try {
@@ -267,7 +276,7 @@ class BillingAgreement {
     $agreement = new Agreement();
     $agreement
       ->setName($originalPlan->getName())
-      ->setDescription($originalPlan->getDescription())
+      ->setDescription($originalPlan->getId())
       ->setStartDate($start_date->format('c'));
 
     $plan = new Plan();
@@ -311,4 +320,25 @@ class BillingAgreement {
 
   }
 
+  public function getAllAgreements($options = []) {
+    $params = array_merge([
+      'page_size' => 20,
+      'status' => 'ACTIVE'
+    ], $options);
+
+    try {
+
+      $agreementList = Agreement::getList($params);
+
+      return $agreementList;
+
+    } catch (\Exception $e) {
+      drupal_set_message($e->getMessage(), "error");
+      return FALSE;
+    }
+  }
+
+  public function getAgreementTransactions($agreementId, $params) {
+    return Agreement::searchTransactions($agreementId, $params, $this->apiContext);
+  }
 }
