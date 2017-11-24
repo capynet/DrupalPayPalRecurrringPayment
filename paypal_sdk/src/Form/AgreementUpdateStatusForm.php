@@ -83,7 +83,6 @@ class AgreementUpdateStatusForm extends ConfirmFormBase {
     /** @var BillingAgreement $pba */
     $pba = Drupal::service('paypal.billing.agreement');
 
-
     switch ($this->status) {
       case BillingAgreement::AGREEMENT_CANCELED:
         $result = $pba->cancelAgreement($this->id);
@@ -97,7 +96,7 @@ class AgreementUpdateStatusForm extends ConfirmFormBase {
     }
 
     if ($result) {
-      drupal_set_message($this->t('The plan <strong>@name</strong> with ID <strong>@id</strong> has been updated.', ['@name' => $name, '@id' => $this->id]));
+      drupal_set_message($this->t('The Agreement with ID <strong>@id</strong> has been updated.', ['@id' => $this->id]));
     }
 
     $form_state->setRedirectUrl($this->getCancelUrl());
