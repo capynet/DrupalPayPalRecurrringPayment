@@ -162,7 +162,6 @@ class PlanEditForm extends FormBase {
     ];
 
     $plan = $pba->updatePlan($plan_id, $values);
-    $a = 0;
   }
 
 }

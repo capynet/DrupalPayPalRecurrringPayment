@@ -82,6 +82,7 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
     $data['cycles_completed'] = $details->getCyclesCompleted();
     $data['cycles_remaining'] = $details->getCyclesRemaining();
     $data['startDate'] = $agreement->getStartDate();
+    $data['state'] = $agreement->getState();
 
 
     $build['list'] = [
@@ -91,7 +92,8 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
         $this->t('last_payment_amount: ' . $data['last_payment_amount']),
         $this->t('cycles_completed: ' . $data['cycles_completed']),
         $this->t('cycles_remaining: ' . $data['cycles_remaining']),
-        $this->t('startDate: ' . $data['startDate'])
+        $this->t('startDate: ' . $data['startDate']),
+        $this->t('state: ' . $data['state']),
       ],
     ];
 
@@ -100,15 +102,15 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
     switch ($agreement->getState()) {
       case BillingAgreement::AGREEMENT_ACTIVE:
         // Suspend link.
-        $actions['Suspend'] = $agreement->getLink('suspend');
+        $actions['Suspend'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_SUSPENDED]);
         // Cancel link.
-        $actions['Cancel'] = $agreement->getLink('cancel');
+        $actions['Cancel'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_CANCELED]);
         break;
       case BillingAgreement::AGREEMENT_SUSPENDED:
         // Re-activate it
-        $actions['Reactivate'] = $agreement->getLink('re-activate');
+        $actions['Reactivate'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_REACTIVE]);
         // Cancel link.
-        $actions['Cancel'] = $agreement->getLink('cancel');
+        $actions['Cancel'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_CANCELED]);
         break;
       case BillingAgreement::AGREEMENT_CANCELED:
         // TODO: Do we need to allow active the agreement or just need to create a new one?
@@ -117,19 +119,8 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
     }
 
     foreach ($actions as $label => $url){
-
-      $link = Link::fromTextAndUrl(
-        $label,
-        Url::fromUri($url, array(
-          'absolute' => TRUE,
-          'attributes' => array(
-            'target' => '_blank',
-            'class' => array('paypal-action-link')
-          )
-        )))->toRenderable();
-
+      $link = Link::fromTextAndUrl($label, $url)->toRenderable();
       $build['list']['#items'][] = $link;
-      $links[] = $link;
     }
 
     // Convert $build to HTML and attach any asset libraries.

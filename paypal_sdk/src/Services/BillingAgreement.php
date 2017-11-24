@@ -5,6 +5,7 @@ namespace Drupal\paypal_sdk\Services;
 use Drupal\Core\Url;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use PayPal\Api\Agreement;
+use PayPal\Api\AgreementStateDescriptor;
 use PayPal\Api\ChargeModel;
 use PayPal\Api\Currency;
 use PayPal\Api\MerchantPreferences;
@@ -64,6 +65,8 @@ class BillingAgreement {
    *
    */
   const AGREEMENT_EXPIRED = 'Expired';
+
+  const AGREEMENT_REACTIVE = 'Re Active';
 
   /**
    * @var \PayPal\Rest\ApiContext
@@ -388,5 +391,30 @@ class BillingAgreement {
     $agreement = Agreement::get($agreementId, $this->apiContext);
 
     return $agreement;
+  }
+
+  public function cancelAgreement($agreementId) {
+    $agreement = $this->getAgreement($agreementId);
+    $agreementStateDescriptor = new AgreementStateDescriptor();
+    $agreementStateDescriptor->setNote('Canceling Agreement');
+
+    return $agreement->cancel($agreementStateDescriptor, $this->apiContext);
+  }
+
+
+  public function suspendAgreement($agreementId) {
+    $agreement = $this->getAgreement($agreementId);
+    $agreementStateDescriptor = new AgreementStateDescriptor();
+    $agreementStateDescriptor->setNote('Suspending Agreement');
+
+    return $agreement->suspend($agreementStateDescriptor, $this->apiContext);
+  }
+
+  public function reactivateAgreement($agreementId) {
+    $agreement = $this->getAgreement($agreementId);
+    $agreementStateDescriptor = new AgreementStateDescriptor();
+    $agreementStateDescriptor->setNote('Reactivating Agreement');
+
+    return $agreement->reActivate($agreementStateDescriptor, $this->apiContext);
   }
 }
