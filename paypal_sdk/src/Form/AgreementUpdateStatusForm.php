@@ -82,7 +82,7 @@ class AgreementUpdateStatusForm extends ConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     /** @var BillingAgreement $pba */
     $pba = Drupal::service('paypal.billing.agreement');
-
+    $result = FALSE;
     switch ($this->status) {
       case BillingAgreement::AGREEMENT_CANCELED:
         $result = $pba->cancelAgreement($this->id);
@@ -97,6 +97,11 @@ class AgreementUpdateStatusForm extends ConfirmFormBase {
 
     if ($result) {
       drupal_set_message($this->t('The Agreement with ID <strong>@id</strong> has been updated.', ['@id' => $this->id]));
+      // TODO: Improve how clean the cache based on the field.
+      // The field is being used only in user entities but should allow be used
+      // in any entity.
+      $user = Drupal::currentUser();
+      \Drupal\Core\Cache\Cache::invalidateTags(['user:' . $user->id()]);
     }
 
     $form_state->setRedirectUrl($this->getCancelUrl());
