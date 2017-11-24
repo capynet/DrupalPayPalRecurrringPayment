@@ -309,4 +309,12 @@ class PaypalSDKController extends ControllerBase {
 
     return $table;
   }
+
+  public static function getAgreement($agreement_id) {
+    /** @var BillingAgreement $pba */
+    $pba = Drupal::service('paypal.billing.agreement');
+    $agreement = $pba->getAgreement($agreement_id);
+
+    return $agreement;
+  }
 }

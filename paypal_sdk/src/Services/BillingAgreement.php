@@ -25,26 +25,62 @@ use PayPal\Rest\ApiContext;
  */
 class BillingAgreement {
 
+  /**
+   *
+   */
   const PLAN_ACTIVE = 'ACTIVE';
 
+  /**
+   *
+   */
   const PLAN_INACTIVE = 'INACTIVE';
 
+  /**
+   *
+   */
   const PLAN_CREATED = 'CREATED';
 
+  /**
+   *
+   */
   const AGREEMENT_PENDING = 'PENDING';
 
-  const AGREEMENT_ACTIVE = 'ACTIVE';
+  /**
+   *
+   */
+  const AGREEMENT_ACTIVE = 'Active';
 
-  const AGREEMENT_SUSPENDED = 'SUSPENDED';
+  /**
+   *
+   */
+  const AGREEMENT_SUSPENDED = 'Suspended';
 
-  const AGREEMENT_CANCELED = 'CANCELED';
+  /**
+   *
+   */
+  const AGREEMENT_CANCELED = 'Canceled';
 
-  const AGREEMENT_EXPIRED = 'EXPIRED';
+  /**
+   *
+   */
+  const AGREEMENT_EXPIRED = 'Expired';
 
+  /**
+   * @var \PayPal\Rest\ApiContext
+   */
   private $apiContext;
+
+  /**
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
   private $configFactory;
 
 
+  /**
+   * BillingAgreement constructor.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   */
   public function __construct(ConfigFactoryInterface $config_factory) {
     $this->apiContext = &drupal_static(__FUNCTION__, FALSE);
     $this->configFactory = $config_factory;
@@ -320,6 +356,11 @@ class BillingAgreement {
 
   }
 
+  /**
+   * @param array $options
+   *
+   * @return array|bool
+   */
   public function getAllAgreements($options = []) {
     $params = array_merge([
       'page_size' => 20,
@@ -338,7 +379,14 @@ class BillingAgreement {
     }
   }
 
-  public function getAgreementTransactions($agreementId, $params) {
-    return Agreement::searchTransactions($agreementId, $params, $this->apiContext);
+
+  /**
+   * @param $agreementId
+   * @param $params
+   */
+  public function getAgreement($agreementId) {
+    $agreement = Agreement::get($agreementId, $this->apiContext);
+
+    return $agreement;
   }
 }

@@ -2,9 +2,13 @@
 
 namespace Drupal\paypal_sdk\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\paypal_sdk\Services\BillingAgreement;
+use Drupal\paypal_sdk\Controller\PaypalSDKController;
 
 
 /**
@@ -14,7 +18,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   id = "paypal_agreement_id_field_formatter",
  *   label = @Translation("Paypal agreement ID"),
  *   field_types = {
- *     "string"
+ *     "paypal_agreement_id_field_type"
  *   }
  * )
  */
@@ -55,45 +59,82 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
 
     foreach ($items as $delta => $item) {
       /** @var Drupal\Core\TypedData\Plugin\DataType\StringData $agreement_id */
-      $agreement_id = $item->get('agreement_id');
-      $elements[$delta] = ['#markup' => $this->viewValue($agreement_id->getCastedValue())];
+      $agreement_id = $item->getString();
+      $elements[$delta] = ['#markup' => $this->viewValue($agreement_id)];
     }
 
     return $elements;
   }
 
-  /**
-   * Generate the output appropriate for one field item.
-   *
-   * @param $subscription_id
-   * @return string The textual output generated.
-   * The textual output generated.
-   * @internal param \Drupal\Core\Field\FieldItemInterface $item One field
-   *   item.*   One field item.
-   *
-   */
-  protected function viewValue($subscription_id) {
-    // TODO: We must implement how items are going to be displayed.
-//    /** @var BillingAgreement $pba */
-//    $pba = Drupal::service('paypal.billing.agreement');
-//    $url = $pba->getUserAgreementLink($subscription_id);
-//
-//
-//    if ($url) {
-//      /** @var Drupal\Core\GeneratedLink $link */
-//      $link = Link::fromTextAndUrl(
-//        $this->getSetting('link_text'),
-//        Url::fromUri($url, array(
-//          'absolute' => TRUE,
-//          'attributes' => array(
-//            'target' => '_blank',
-//            'class' => array('paypal-subscribe-link')
-//          )
-//        )))->toRenderable();
-//
-//      return render($link);
-//    }
 
-    return '';
+  /**
+   *   @param $agreementId
+   *
+   * @return mixed
+   */
+  protected function viewValue($agreementId) {
+    $agreement = PaypalSDKController::getAgreement($agreementId);
+    $data = [];
+    /** @var \PayPal\Api\AgreementDetails $details */
+    $details = $agreement->getAgreementDetails();
+    $data['next_billing_date'] = $details->getNextBillingDate();
+    $data['last_payment_amount'] = $details->getLastPaymentAmount();
+    $data['cycles_completed'] = $details->getCyclesCompleted();
+    $data['cycles_remaining'] = $details->getCyclesRemaining();
+    $data['startDate'] = $agreement->getStartDate();
+
+
+    $build['list'] = [
+      '#theme' => 'item_list',
+      '#items' => [
+        $this->t('next_billing_date: ' . $data['next_billing_date']),
+        $this->t('last_payment_amount: ' . $data['last_payment_amount']),
+        $this->t('cycles_completed: ' . $data['cycles_completed']),
+        $this->t('cycles_remaining: ' . $data['cycles_remaining']),
+        $this->t('startDate: ' . $data['startDate'])
+      ],
+    ];
+
+
+    $actions = [];
+    switch ($agreement->getState()) {
+      case BillingAgreement::AGREEMENT_ACTIVE:
+        // Suspend link.
+        $actions['Suspend'] = $agreement->getLink('suspend');
+        // Cancel link.
+        $actions['Cancel'] = $agreement->getLink('cancel');
+        break;
+      case BillingAgreement::AGREEMENT_SUSPENDED:
+        // Re-activate it
+        $actions['Reactivate'] = $agreement->getLink('re-activate');
+        // Cancel link.
+        $actions['Cancel'] = $agreement->getLink('cancel');
+        break;
+      case BillingAgreement::AGREEMENT_CANCELED:
+        // TODO: Do we need to allow active the agreement or just need to create a new one?
+        break;
+
+    }
+
+    foreach ($actions as $label => $url){
+
+      $link = Link::fromTextAndUrl(
+        $label,
+        Url::fromUri($url, array(
+          'absolute' => TRUE,
+          'attributes' => array(
+            'target' => '_blank',
+            'class' => array('paypal-action-link')
+          )
+        )))->toRenderable();
+
+      $build['list']['#items'][] = $link;
+      $links[] = $link;
+    }
+
+    // Convert $build to HTML and attach any asset libraries.
+    $html = \Drupal::service('renderer')->renderRoot($build);
+
+    return $html;
   }
 }
