@@ -18,6 +18,17 @@ paypal_sdk.process_cancelled_response:
   requirements:
     _permission: 'subscribe paypal products'
 
+# Returns an agreement link
+paypal_sdk.generate_agreement_link:
+  path: '/paypal/agreement/get-agreement-link'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\paypal_sdk\Controller\PaypalSDKController::getAgreementLink'
+    _title: 'PayPal agreement link'
+  requirements:
+    _permission: 'subscribe paypal products'
+
+
 # Plan routes
 paypal_sdk.billing_plan_list:
   path: '/admin/store/billing-plan/list'

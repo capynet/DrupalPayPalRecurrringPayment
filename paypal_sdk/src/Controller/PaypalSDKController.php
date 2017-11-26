@@ -4,10 +4,12 @@ namespace Drupal\paypal_sdk\Controller;
 
 use Drupal;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\paypal_sdk\Services\BillingAgreement;
 use Drupal\user\Entity\User;
 use PayPal\Api\Agreement;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Class PaypalSDKController
@@ -328,5 +330,37 @@ class PaypalSDKController extends ControllerBase {
     $agreement = $pba->getAgreement($agreement_id);
 
     return $agreement;
+  }
+
+
+  /**
+   * Generates an agreement link and returns it for ajax calls.
+   */
+  public function getAgreementLink() {
+    $request = Drupal::request();
+    $plan_id = $request->get('id');
+
+    // We cant cache the link since it is created
+    /** @var BillingAgreement $pba */
+    $pba = Drupal::service('paypal.billing.agreement');
+    $url = $pba->getUserAgreementLink($plan_id);
+    $res = '';
+
+    if ($url) {
+      /** @var Drupal\Core\GeneratedLink $link */
+      $link = Link::fromTextAndUrl(
+        'Subscribe',
+        Url::fromUri($url, array(
+          'absolute' => TRUE,
+          'attributes' => array(
+            'target' => '_blank',
+            'class' => array('paypal-subscribe-link')
+          )
+        )))->toRenderable();
+
+      $res = render($link);
+    }
+
+    return new JsonResponse(['link' => $res]);
   }
 }

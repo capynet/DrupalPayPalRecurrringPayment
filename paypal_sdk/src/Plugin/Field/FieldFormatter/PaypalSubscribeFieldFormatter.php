@@ -82,36 +82,27 @@ class PaypalSubscribeFieldFormatter extends FormatterBase {
    * Generate the output appropriate for one field item.
    *
    * @param $plan_id
-   * @return string The textual output generated.
-   * The textual output generated.
-   * @internal param \Drupal\Core\Field\FieldItemInterface $item One field
-   *   item.*   One field item.
-   *
+   * @return array
    */
   protected function viewValue($plan_id) {
+    /*
+     * Since twe need a fresh link for each user and since the API is so slow, we return
+     * a placeholder and replace it via ajax with the generated link.
+     * */
+    $placeholder = [
+      '#type' => 'markup',
+      '#markup' => '<div class="placeholder-agreement-link" data-agreement-plan-id="' . $plan_id . '">' . t('Subscription link loading...') . '</div>',
+      '#attached' => [
+        'library' => ['paypal_sdk/generate-link'],
+        'drupalSettings' => [
+          'ppssFieldFormatter' => [
+            'url' => Url::fromRoute('paypal_sdk.generate_agreement_link')->toString()
+          ]
+        ]
+      ]
+    ];
 
-    // We cant cache the link since it is created
-    /** @var BillingAgreement $pba */
-    $pba = Drupal::service('paypal.billing.agreement');
-    $url = $pba->getUserAgreementLink($plan_id);
-
-
-    if ($url) {
-      /** @var Drupal\Core\GeneratedLink $link */
-      $link = Link::fromTextAndUrl(
-        $this->getSetting('link_text'),
-        Url::fromUri($url, array(
-          'absolute' => TRUE,
-          'attributes' => array(
-            'target' => '_blank',
-            'class' => array('paypal-subscribe-link')
-          )
-        )))->toRenderable();
-
-      return render($link);
-    }
-
-    return '';
+    return render($placeholder);
   }
 
 }
