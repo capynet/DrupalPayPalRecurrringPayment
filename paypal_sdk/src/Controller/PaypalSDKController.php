@@ -96,14 +96,26 @@ class PaypalSDKController extends ControllerBase {
    */
   public function billingPlanList() {
 
-    $build = array(
-      '#theme' => 'plan_list_tables',
-      '#tables' => [
-        'created' => $this->getPlanTableList(['status' => 'CREATED']),
-        'active' => $this->getPlanTableList(['status' => 'ACTIVE']),
-        'inactive' => $this->getPlanTableList(['status' => 'INACTIVE'])
-      ],
-    );
+    $paypal_credentials = \Drupal::config('config.paypal_credentials');
+    $access = $paypal_credentials->get('client_id') && $paypal_credentials->get('client_secret');
+
+    if (!$access) {
+      $build = array(
+        '#type' => 'markup',
+        '#markup' => t('Please fill the PayPal credentials to use this module'),
+      );
+    }
+    else {
+      $build = array(
+        '#theme' => 'plan_list_tables',
+        '#tables' => [
+          'created' => $this->getPlanTableList(['status' => 'CREATED']),
+          'active' => $this->getPlanTableList(['status' => 'ACTIVE']),
+          'inactive' => $this->getPlanTableList(['status' => 'INACTIVE'])
+        ],
+      );
+    }
+
 
     return $build;
   }
