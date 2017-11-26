@@ -68,7 +68,7 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
 
 
   /**
-   *   @param $agreementId
+   * @param $agreementId
    *
    * @return mixed
    */
@@ -118,7 +118,7 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
 
     }
 
-    foreach ($actions as $label => $url){
+    foreach ($actions as $label => $url) {
       $link = Link::fromTextAndUrl($label, $url)->toRenderable();
       $build['list']['#items'][] = $link;
     }

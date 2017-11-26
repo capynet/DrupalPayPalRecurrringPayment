@@ -67,7 +67,7 @@ class PaypalSDKController extends ControllerBase {
     // Append new agreement.
     $agreementMapping = $this->config('config.paypal_mapping')->get('mapping');
     $plan_id = $agreement->getDescription();
-    list($entity,$agreementField) = explode('-',$agreementMapping[$plan_id]);
+    list($entity, $agreementField) = explode('-', $agreementMapping[$plan_id]);
     $userEntity = User::load($user->id());
     $userEntity->{$agreementField}->appendItem($agreement->getId());
 
@@ -175,9 +175,9 @@ class PaypalSDKController extends ControllerBase {
       switch ($plan->getState()) {
         case BillingAgreement::PLAN_ACTIVE:
           $table['contacts'][$k]['operations']['#links']['inactive'] = [
-              'title' => t('Desactivate'),
-              'url' => Url::fromRoute('paypal_sdk.plan_update_status_form', ['plan_id' => $plan->getId(), 'status' => BillingAgreement::PLAN_INACTIVE])
-            ];
+            'title' => t('Desactivate'),
+            'url' => Url::fromRoute('paypal_sdk.plan_update_status_form', ['plan_id' => $plan->getId(), 'status' => BillingAgreement::PLAN_INACTIVE])
+          ];
 
           break;
 
@@ -241,7 +241,7 @@ class PaypalSDKController extends ControllerBase {
     }
 
     foreach ($agreementList as $k => $agreement) {
-      /** @var \PayPal\Api\Agreement  $agreement */
+      /** @var \PayPal\Api\Agreement $agreement */
 
       $table['contacts'][$k]['name'] = array(
         '#type' => 'markup',
@@ -290,7 +290,7 @@ class PaypalSDKController extends ControllerBase {
 
           $table['contacts'][$k]['operations']['#links']['inactive'] = [
             'title' => t('Desactivate'),
-            'url' => Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreement>getId(), 'status' => BillingAgreement::AGREEMENT_SUSPENDED])
+            'url' => Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreement > getId(), 'status' => BillingAgreement::AGREEMENT_SUSPENDED])
           ];
 
           break;
