@@ -70,9 +70,9 @@ class PaypalSubscribeFieldFormatter extends FormatterBase {
 
     foreach ($items as $delta => $item) {
       /** @var Drupal\Core\TypedData\Plugin\DataType\StringData $a */
-      $subscription_id = $item->get('subscription_id');
+      $plan_id = $item->get('plan_id');
 
-      $elements[$delta] = ['#markup' => $this->viewValue($subscription_id->getCastedValue())];
+      $elements[$delta] = ['#markup' => $this->viewValue($plan_id->getCastedValue())];
     }
 
     return $elements;
@@ -81,17 +81,19 @@ class PaypalSubscribeFieldFormatter extends FormatterBase {
   /**
    * Generate the output appropriate for one field item.
    *
-   * @param $subscription_id
+   * @param $plan_id
    * @return string The textual output generated.
    * The textual output generated.
    * @internal param \Drupal\Core\Field\FieldItemInterface $item One field
    *   item.*   One field item.
    *
    */
-  protected function viewValue($subscription_id) {
+  protected function viewValue($plan_id) {
+
+    // We cant cache the link since it is created
     /** @var BillingAgreement $pba */
     $pba = Drupal::service('paypal.billing.agreement');
-    $url = $pba->getUserAgreementLink($subscription_id);
+    $url = $pba->getUserAgreementLink($plan_id);
 
 
     if ($url) {

@@ -7,24 +7,25 @@ paypal_sdk.store:
 
 # PayPal billing plan menu items definition
 paypal_sdk_plan_list:
-  title: 'PayPal billing plans'
+  title: 'PayPal subscription plans'
   route_name: paypal_sdk.billing_plan_list
-  description: 'List PayPal billing plans'
+  description: 'Manage here the plans to which users can subscribe.'
   parent: paypal_sdk.store
-  weight: 100
+  weight: 1
 
 # PayPal agreements menu items definition
 paypal_sdk_agreement_list:
   title: 'PayPal Agreements'
   route_name: paypal_sdk.agreements_list
-  description: 'List PayPal agreements'
+  description: 'List of subscriptions made by users.'
   parent: paypal_sdk.store
-  weight: 100
+  weight: 2
 
 # Paypal Configuration
 paypal_sdk.config:
+ title: 'Settings'
  route_name: paypal_sdk.config.form
- parent: system.admin_config_system
- description: 'Configure Paypal'
+ parent: paypal_sdk.store
+ description: 'Configure PayPal simple subscription'
  title: Paypal SDK
- weight: 0
+ weight: 3

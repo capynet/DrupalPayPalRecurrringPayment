@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @FieldWidget(
  *   id = "paypal_subscribe_field_widget",
- *   label = @Translation("Paypal subscribe field widget"),
+ *   label = @Translation("PayPal Simple Subscription widget"),
  *   field_types = {
  *     "paypal_subscribe_field_type"
  *   }
@@ -82,11 +82,11 @@ class PaypalSubscribeFieldWidget extends WidgetBase {
     }
 
 
-    $element['subscription_id'] = $element + [
+    $element['plan_id'] = $element + [
         '#type' => 'select',
         '#options' => $options,
         '#title' => t('Select the subscription'),
-        '#default_value' => isset($items[$delta]->subscription_id) ? $items[$delta]->subscription_id : NULL,
+        '#default_value' => isset($items[$delta]->plan_id) ? $items[$delta]->plan_id : NULL,
         '#required' => FALSE,
         '#min' => 1,
       ];

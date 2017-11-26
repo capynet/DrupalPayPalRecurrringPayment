@@ -15,8 +15,8 @@ use Drupal\Core\TypedData\DataDefinition;
  *
  * @FieldType(
  *   id = "paypal_subscribe_field_type",
- *   label = @Translation("Paypal subscribe"),
- *   description = @Translation("My Field Type"),
+ *   label = @Translation("PayPal Simple Subscription"),
+ *   description = @Translation("Renders a subscription link."),
  *   default_widget = "paypal_subscribe_field_widget",
  *   default_formatter = "paypal_subscribe_field_formatter"
  * )
@@ -28,7 +28,7 @@ class PaypalSubscribeFieldType extends FieldItemBase {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     // Prevent early t() calls by using the TranslatableMarkup.
-    $properties['subscription_id'] = DataDefinition::create('string')
+    $properties['plan_id'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Billing plan ID'))
       ->setSetting('case_sensitive', FALSE)
       ->setRequired(TRUE);
@@ -42,7 +42,7 @@ class PaypalSubscribeFieldType extends FieldItemBase {
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     $schema = [
       'columns' => [
-        'subscription_id' => [
+        'plan_id' => [
           'type' => 'varchar',
           'length' => 50,
           'binary' => FALSE,
@@ -57,7 +57,7 @@ class PaypalSubscribeFieldType extends FieldItemBase {
    * {@inheritdoc}
    */
   public function isEmpty() {
-    $value = $this->get('subscription_id')->getValue();
+    $value = $this->get('plan_id')->getValue();
     return $value === NULL || $value === '';
   }
 
