@@ -65,18 +65,28 @@ class PaypalAdminForm extends ConfigFormBase {
 
 
     if ($paypal_credentials->get('client_id') && $paypal_credentials->get('client_secret')) {
+
+      $form['assign_plans_to_field'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Contactsettings'),
+        '#collapsible' => FALSE,
+        '#description' => t('Please assign to each subscription plan a user field (can be the same if you want.)'),
+      );
+
       // Create Agreement payments field mappings.
       $PlanOptions = $this->getActivePlans();
       $agreementMap = $this->getAgreementFieldsOptions();
       $default = $paypal_mapping->get('mapping');
 
       foreach ($PlanOptions as $k => $plan) {
-        $form['mapping'][$k] = array(
+        $form['assign_plans_to_field']['mapping'][$k] = array(
           '#type' => 'select',
           '#title' => $plan . t(' Plan'),
           '#options' => $agreementMap,
           '#description' => '',
           '#default_value' => $default[$k],
+          '#empty_option' => '-- Select Agreement Field --',
+          '#required' => TRUE
         );
       }
     }
@@ -140,7 +150,7 @@ class PaypalAdminForm extends ConfigFormBase {
    * @return mixed
    */
   private function getAgreementFieldsOptions() {
-    $agreementMap[] = '-- Select Agreement Field --';
+    $agreementMap = [];
     $cache = Drupal::cache();
 
     if ($cache->get('paypal_sdk_agreement_mapping_list')) {
