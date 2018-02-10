@@ -34,9 +34,14 @@ class PaypalSDKController extends ControllerBase {
     /** @var \PayPal\Api\Payer $payer */
     $payer = $agreement->getPayer();
 
+    $plan_id = $agreement->getDescription();
+    $agreement_id = $agreement->getId();
+
+    // Append new agreement.
+    $agreementMapping = $this->config('config.paypal_mapping')->get('mapping');
+    list($entity, $agreementField) = explode('-', $agreementMapping[$plan_id]);
 
     // If the current user is anonymous and the email does not exist on any user, create a new account.
-
     if (Drupal::currentUser()->isAnonymous()) {
 
       // The email (user) already exist?
@@ -49,6 +54,7 @@ class PaypalSDKController extends ControllerBase {
         $user->enforceIsNew();
         $user->setEmail($payer->getPayerInfo()->getEmail());
         $user->setUsername($payer->getPayerInfo()->getEmail());
+        $user->set($agreementField, $agreement_id);
         //$user->addRole('socio'); ?
         $user->activate();
         $user->save();
@@ -59,28 +65,24 @@ class PaypalSDKController extends ControllerBase {
       }
       else {
         $user = $existingUser;
+        $user->set($agreementField, $agreement_id);
+        $user->save();
       }
 
     }
     else {
+      /** @var  \Drupal\user\Entity\User $user */
       $user = Drupal::currentUser();
+      $user->set($agreementField, $agreement_id);
+      $user->save();
     }
 
-    // Append new agreement.
-    $agreementMapping = $this->config('config.paypal_mapping')->get('mapping');
-    $plan_id = $agreement->getDescription();
-    list($entity, $agreementField) = explode('-', $agreementMapping[$plan_id]);
-    $userEntity = User::load($user->id());
-    $userEntity->{$agreementField}->appendItem($agreement->getId());
-
-    $userEntity->save();
     return $this->redirect('<front>');
 
-// Debug
-//    return array(
-//      '#markup' => '<pre>' . $agreement->toJSON(JSON_PRETTY_PRINT) . '</pre>',
-//    );
-
+    // Debug
+    //    return array(
+    //      '#markup' => '<pre>' . $agreement->toJSON(JSON_PRETTY_PRINT) . '</pre>',
+    //    );
   }
 
   /**
