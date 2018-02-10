@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\paypal_sdk\Services\BillingAgreement;
 use Drupal\paypal_sdk\Controller\PaypalSDKController;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 
 /**
@@ -75,6 +76,7 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
   protected function viewValue($agreementId) {
     $agreement = PaypalSDKController::getAgreement($agreementId);
     $data = [];
+
     /** @var \PayPal\Api\AgreementDetails $details */
     $details = $agreement->getAgreementDetails();
     $data['next_billing_date'] = $details->getNextBillingDate();
@@ -84,17 +86,30 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
     $data['startDate'] = $agreement->getStartDate();
     $data['state'] = $agreement->getState();
 
+    $utcTimezone = new \DateTimeZone('UTC');
+    $next_billing_date = new \DateTime($data['next_billing_date'], $utcTimezone);
+    $start_date = new \DateTime($data['startDate'], $utcTimezone);
 
-    $build['list'] = [
-      '#theme' => 'item_list',
-      '#items' => [
-        $this->t('next_billing_date: ' . $data['next_billing_date']),
-        $this->t('last_payment_amount: ' . $data['last_payment_amount']),
-        $this->t('cycles_completed: ' . $data['cycles_completed']),
-        $this->t('cycles_remaining: ' . $data['cycles_remaining']),
-        $this->t('startDate: ' . $data['startDate']),
-        $this->t('state: ' . $data['state']),
+    $build['table'] = [
+      '#theme' => 'table',
+      '#header' => [
+        $this->t('Started at'),
+        $this->t('Next billing date'),
+        $this->t('State'),
+        $this->t('Cycles completed'),
+        $this->t('Cycles remaining'),
+        $this->t('Actions'),
       ],
+      '#rows' => [
+        [
+          ['data' => $start_date->format('m/d/Y H:i')],
+          ['data' => $next_billing_date->format('m/d/Y H:i')],
+          ['data' => $data['state']],
+          ['data' => $data['cycles_completed']],
+          ['data' => $data['cycles_remaining']],
+        ]
+      ],
+      '#empty' => $this->t("There are no PayPal subscriptions for this user."),
     ];
 
 
@@ -118,10 +133,14 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
 
     }
 
+    $links = [];
+
     foreach ($actions as $label => $url) {
-      $link = Link::fromTextAndUrl($label, $url)->toRenderable();
-      $build['list']['#items'][] = $link;
+      $links[] = Link::fromTextAndUrl($label, $url)->toString()->getGeneratedLink();
     }
+
+    $renderable_links = ['#markup' => implode(' | ', $links)];
+    $build['table']['#rows'][0][] = ['data' => render($renderable_links)];
 
     // Convert $build to HTML and attach any asset libraries.
     $html = \Drupal::service('renderer')->renderRoot($build);
