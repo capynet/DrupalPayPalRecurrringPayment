@@ -59,7 +59,6 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
     $elements = [];
 
     foreach ($items as $delta => $item) {
-      /** @var Drupal\Core\TypedData\Plugin\DataType\StringData $agreement_id */
       $agreement_id = $item->getString();
       $elements[$delta] = ['#markup' => $this->viewValue($agreement_id)];
     }
@@ -74,39 +73,51 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
    * @return mixed
    */
   protected function viewValue($agreementId) {
-    $agreement = PaypalSDKController::getAgreement($agreementId);
-    $data = [];
 
+    // Agreement.
+    /** @var \PayPal\Api\Agreement $details */
+    $agreement = PaypalSDKController::getAgreement($agreementId);
     /** @var \PayPal\Api\AgreementDetails $details */
     $details = $agreement->getAgreementDetails();
-    $data['next_billing_date'] = $details->getNextBillingDate();
-    $data['last_payment_amount'] = $details->getLastPaymentAmount();
-    $data['cycles_completed'] = $details->getCyclesCompleted();
-    $data['cycles_remaining'] = $details->getCyclesRemaining();
-    $data['startDate'] = $agreement->getStartDate();
-    $data['state'] = $agreement->getState();
 
+    // Plan.
+    /** @var BillingAgreement $pba */
+    $pba = \Drupal::service('paypal.billing.agreement');
+    $plan = $pba->getPlan($agreement->getDescription());
+    $plan_payment_definitions_arr = $plan->getPaymentDefinitions();
+    /** @var \PayPal\Api\PaymentDefinition $plan_payment_definitions */
+    $plan_payment_definitions = $plan_payment_definitions_arr[0];
+    /** @var \PayPal\Api\Currency $plan_amount */
+    $plan_amount = $plan_payment_definitions->getAmount();
+
+    // Format dates.
     $utcTimezone = new \DateTimeZone('UTC');
-    $next_billing_date = new \DateTime($data['next_billing_date'], $utcTimezone);
-    $start_date = new \DateTime($data['startDate'], $utcTimezone);
+    $next_billing_date = new \DateTime($details->getNextBillingDate(), $utcTimezone);
+    $start_date = new \DateTime($agreement->getStartDate(), $utcTimezone);
+
+    $name_and_desc = ['#markup' => $plan->getName() . '<br/><sub>' . $plan->getDescription() . '</sub>'];
 
     $build['table'] = [
       '#theme' => 'table',
       '#header' => [
+        $this->t('ID'),
+        $this->t('Name'),
+        $this->t('Subscription type'),
+        $this->t('Amount'),
         $this->t('Started at'),
         $this->t('Next billing date'),
         $this->t('State'),
-        $this->t('Cycles completed'),
-        $this->t('Cycles remaining'),
         $this->t('Actions'),
       ],
       '#rows' => [
         [
-          ['data' => $start_date->format('m/d/Y H:i')],
-          ['data' => $next_billing_date->format('m/d/Y H:i')],
-          ['data' => $data['state']],
-          ['data' => $data['cycles_completed']],
-          ['data' => $data['cycles_remaining']],
+          ['data' => $agreementId],
+          ['data' => render($name_and_desc)],
+          ['data' => $plan_payment_definitions->getType()],
+          ['data' => $plan_amount->getValue() . ' ' . $plan_amount->getCurrency()],
+          ['data' => $start_date->format('m/d/Y')],
+          ['data' => $next_billing_date->format('m/d/Y')],
+          ['data' => $agreement->getState()],
         ]
       ],
       '#empty' => $this->t("There are no PayPal subscriptions for this user."),
