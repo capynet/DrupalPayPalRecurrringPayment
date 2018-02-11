@@ -39,7 +39,10 @@ class PaypalSDKController extends ControllerBase {
 
     // Append new agreement.
     $agreementMapping = $this->config('config.paypal_mapping')->get('mapping');
-    list($entity, $agreementField) = explode('-', $agreementMapping[$plan_id]);
+
+    // @fixme if you create a plan $this->config('config.paypal_mapping')->get('mapping') will still keep the old conf.
+    // list($entity, $agreementField) = explode('-', $agreementMapping[$plan_id]);
+    $agreementField = 'field_paypal_agreement_id';
 
     // If the current user is anonymous and the email does not exist on any user, create a new account.
     if (Drupal::currentUser()->isAnonymous()) {
