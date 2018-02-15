@@ -97,32 +97,25 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
 
     $name_and_desc = ['#markup' => $plan->getName() . '<br/><sub>' . $plan->getDescription() . '</sub>'];
 
-    $build['table'] = [
-      '#theme' => 'table',
-      '#header' => [
-        $this->t('ID'),
-        $this->t('Name'),
-        $this->t('Subscription type'),
-        $this->t('Amount'),
-        $this->t('Started at'),
-        $this->t('Next billing date'),
-        $this->t('State'),
-        $this->t('Actions'),
-      ],
-      '#rows' => [
-        [
-          ['data' => $agreementId],
-          ['data' => render($name_and_desc)],
-          ['data' => $plan_payment_definitions->getType()],
-          ['data' => $plan_amount->getValue() . ' ' . $plan_amount->getCurrency()],
-          ['data' => $start_date->format('m/d/Y')],
-          ['data' => $next_billing_date->format('m/d/Y')],
-          ['data' => $agreement->getState()],
-        ]
-      ],
-      '#empty' => $this->t("There are no PayPal subscriptions for this user."),
+    $table_header = [
+      $this->t('ID'),
+      $this->t('Name'),
+      // $this->t('Subscription type'),
+      $this->t('Amount'),
+      $this->t('Started at'),
+      $this->t('Next billing date'),
+      $this->t('Status'),
     ];
 
+    $table_rows = [
+      ['data' => $agreementId],
+      ['data' => render($name_and_desc)],
+      // ['data' => $plan_payment_definitions->getType()],
+      ['data' => $plan_amount->getValue() . ' ' . $plan_amount->getCurrency()],
+      ['data' => $start_date->format('m/d/Y')],
+      ['data' => $next_billing_date->format('m/d/Y')],
+      ['data' => $agreement->getState()],
+    ];
 
     $actions = [];
     switch ($agreement->getState()) {
@@ -141,17 +134,29 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
       case BillingAgreement::AGREEMENT_CANCELED:
         // TODO: Do we need to allow active the agreement or just need to create a new one?
         break;
-
     }
 
-    $links = [];
+    if (count($actions)) {
+      $links = [];
 
-    foreach ($actions as $label => $url) {
-      $links[] = Link::fromTextAndUrl($label, $url)->toString()->getGeneratedLink();
+      foreach ($actions as $label => $url) {
+        $links[] = Link::fromTextAndUrl($label, $url)->toString()->getGeneratedLink();
+      }
+
+      $renderable_links = ['#markup' => implode(' | ', $links)];
+      $table_rows[] = ['data' => render($renderable_links)];
+      $table_header[] = $this->t('Actions');
     }
 
-    $renderable_links = ['#markup' => implode(' | ', $links)];
-    $build['table']['#rows'][0][] = ['data' => render($renderable_links)];
+    $build['table'] = [
+      '#theme' => 'table',
+      '#header' => $table_header,
+      '#rows' => [
+        $table_rows
+      ],
+      '#empty' => $this->t("There are no PayPal subscriptions for this user."),
+    ];
+
 
     // Convert $build to HTML and attach any asset libraries.
     $html = \Drupal::service('renderer')->renderRoot($build);
