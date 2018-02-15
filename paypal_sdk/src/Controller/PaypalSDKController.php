@@ -74,8 +74,8 @@ class PaypalSDKController extends ControllerBase {
 
     }
     else {
-      /** @var  \Drupal\user\Entity\User $user */
-      $user = Drupal::currentUser();
+      $uid = Drupal::currentUser()->id();
+      $user = User::load($uid);
       $user->set($agreementField, $agreement_id);
       $user->save();
     }
