@@ -342,6 +342,9 @@ class PaypalSDKController extends ControllerBase {
    * Generates an agreement link and returns it for ajax calls.
    */
   public function getAgreementLink() {
+    $build = [
+      '#theme' => 'paypal_sdk__agreement_link'
+    ];
     $request = Drupal::request();
     $plan_id = $request->get('id');
 
@@ -349,23 +352,13 @@ class PaypalSDKController extends ControllerBase {
     /** @var BillingAgreement $pba */
     $pba = Drupal::service('paypal.billing.agreement');
     $url = $pba->getUserAgreementLink($plan_id);
-    $res = '';
 
     if ($url) {
-      /** @var Drupal\Core\GeneratedLink $link */
-      $link = Link::fromTextAndUrl(
-        'Subscribe',
-        Url::fromUri($url, array(
-          'absolute' => TRUE,
-          'attributes' => array(
-            'target' => '_blank',
-            'class' => array('paypal-subscribe-link')
-          )
-        )))->toRenderable();
-
-      $res = render($link);
+      $build['#url'] = $url;
     }
 
-    return new JsonResponse(['link' => $res]);
+    $res = render($build);
+
+    return new JsonResponse(['res' => $res]);
   }
 }

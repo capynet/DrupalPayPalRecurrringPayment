@@ -120,14 +120,14 @@ class PaypalAgreementIdFieldFormatter extends FormatterBase {
     $actions = [];
     switch ($agreement->getState()) {
       case BillingAgreement::AGREEMENT_ACTIVE:
-        // Suspend link.
-        $actions['Suspend'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_SUSPENDED]);
+        // Suspend link. @todo review if have sense to give to the user this option.
+        // $actions['Suspend'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_SUSPENDED]);
         // Cancel link.
         $actions['Cancel'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_CANCELED]);
         break;
       case BillingAgreement::AGREEMENT_SUSPENDED:
-        // Re-activate it
-        $actions['Reactivate'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_REACTIVE]);
+        // Re-activate it @todo review if have sense to give to the user this option.
+        // $actions['Reactivate'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_REACTIVE]);
         // Cancel link.
         $actions['Cancel'] = Url::fromRoute('paypal_sdk.agreement_update_status_form', ['agreement_id' => $agreementId, 'status' => BillingAgreement::AGREEMENT_CANCELED]);
         break;
