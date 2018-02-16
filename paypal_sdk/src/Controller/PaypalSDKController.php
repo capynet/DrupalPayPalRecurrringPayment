@@ -31,8 +31,8 @@ class PaypalSDKController extends ControllerBase {
     /** @var \PayPal\Api\Agreement $agreement */
     $agreement = $pba->processAgreementResponse($token);
 
-    /** @var \PayPal\Api\Payer $player */
-    $player = $agreement->getPayer();
+    /** @var \PayPal\Api\Payer $payer */
+    $payer = $agreement->getPayer();
 
     $plan_id = $agreement->getDescription();
     $plan = $pba->getPlan($plan_id);
@@ -41,7 +41,7 @@ class PaypalSDKController extends ControllerBase {
     Drupal::moduleHandler()->invokeAll('paypal_agreement_response_ok', [
       'agreement' => $agreement,
       'plan' => $plan,
-      'player' => $player
+      'payer' => $payer
     ]);
 
     return $this->redirect('<front>');
