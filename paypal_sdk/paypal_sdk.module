@@ -65,6 +65,7 @@ function paypal_sdk_paypal_agreement_response_ok($agreement, $plan, $payer) {
       $user->setUsername($payer->getPayerInfo()->getEmail());
       $user->set($agreementField, $agreement_id);
       $user->addRole('socio');
+      $user->addRole('socio_2018');
       $user->activate();
       $user->save();
 
