@@ -87,10 +87,23 @@ class BillingAgreement {
   public function __construct(ConfigFactoryInterface $config_factory) {
     $this->apiContext = &drupal_static(__FUNCTION__, FALSE);
     $this->configFactory = $config_factory;
+
+    $config = $this->configFactory->get('paypal_sdk.settings');
+    $env = $config->get('environment');
+    $client_id = $config->get($env . '_client_id');
+    $client_secret = $config->get($env . '_client_secret');
+
     if (!$this->apiContext) {
       $this->apiContext = new ApiContext(
-        new OAuthTokenCredential($this->configFactory->get('config.paypal_credentials')->get('client_id'), $this->configFactory->get('config.paypal_credentials')->get('client_secret'))
+        new OAuthTokenCredential($client_id, $client_secret)
       );
+
+      $this->apiContext->setConfig(
+        array(
+          'mode' => $env,
+        )
+      );
+
     }
 
   }
