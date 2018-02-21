@@ -114,17 +114,20 @@ class BillingAgreement {
    * @return bool|\PayPal\Api\Plan $plan
    */
   public function createPlan($data) {
+    // Cycles must be 0 if the plan type is "infinite".
+    $cycles = $data['plan_type'] == "FIXED" ? $data['payment_cycles'] : 0;
     $plan = new Plan();
 
     $plan
       ->setName($data['name'])
       ->setDescription($data['description'])
-      ->setType($data['type']);
+      ->setType($data['plan_type']);
 
     $paymentDefinition = new PaymentDefinition();
-    $cycles = $data['type'] == "FIXED" ? $data['payment_cycles'] : 0;
-    $paymentDefinition->setName('Regular Payments')// dinamizar
-    ->setType($data['payment_type'])
+
+    $paymentDefinition
+      ->setName('Regular Payments')// dinamizar
+      ->setType('REGULAR')
       ->setFrequency($data['payment_frequency'])
       ->setFrequencyInterval($data['payment_frequency_interval'])
       ->setCycles($cycles)
@@ -133,35 +136,43 @@ class BillingAgreement {
         'currency' => $data['payment_currency']
       )));
 
-    // @todo hacer opcional.
-    $chargeModel = new ChargeModel();
-    $chargeModel->setType('TAX')
-      ->setAmount(new Currency(array(
-        'value' => $data['payment_amount'] * .21,
-        'currency' => $data['payment_currency']
-      )));
+    if ($data['tax'] !== '' && $data['tax'] !== '0') {
+      // Taxes
+      $chargeModel = new ChargeModel();
 
-    $paymentDefinition->setChargeModels(array($chargeModel));
+      $chargeModel->setType('TAX')
+        ->setAmount(new Currency(array(
+          'value' => $data['payment_amount'] * $data['tax'],
+          'currency' => $data['payment_currency']
+        )));
 
-    $merchantPreferences = new MerchantPreferences();
+      // Sample Shipping costs
+      // $chargeModel = new ChargeModel();
+      // $chargeModel->setType('SHIPPING')
+      //   ->setAmount(new Currency(array(
+      //    'value' => "10",
+      //    'currency' => "EUR"
+      //  )));
+
+      $paymentDefinition->setChargeModels(array($chargeModel));
+    }
+
     $returnURL = Url::fromUri('internal:/paypal/subscribe/response/process/', ['absolute' => TRUE])->toString();
     $cancelURL = Url::fromUri('internal:/paypal/subscribe/response/cancelled/', ['absolute' => TRUE])->toString();
 
+    $merchantPreferences = new MerchantPreferences();
     $merchantPreferences
       ->setReturnUrl($returnURL)
       ->setCancelUrl($cancelURL)
       ->setAutoBillAmount("yes")
       ->setInitialFailAmountAction("CONTINUE")
       ->setMaxFailAttempts("0");
-//    ->setSetupFee(new Currency(array('value' => 1, 'currency' => $entity->get('field_payment_currency')->value)));
-
 
     $plan->setPaymentDefinitions(array($paymentDefinition));
     $plan->setMerchantPreferences($merchantPreferences);
 
     try {
       $createdPlan = $plan->create($this->apiContext);
-      //$this->setState();
       return $createdPlan;
     } catch (\Exception $e) {
       drupal_set_message($e->getMessage(), "error");
