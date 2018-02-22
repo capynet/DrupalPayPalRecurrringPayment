@@ -31,37 +31,37 @@ class PlanAddForm extends FormBase {
       [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48]
     );
 
-    $form['name'] = array(
+    $form['name'] = [
       '#title' => $this->t('Name'),
       '#required' => TRUE,
       '#type' => 'textfield',
       '#description' => $this->t('The name of the PayPal billing plan entity.'),
-    );
+    ];
 
-    $form['description'] = array(
+    $form['description'] = [
       '#title' => $this->t('Description'),
       '#type' => 'textfield',
       '#required' => TRUE,
-    );
+    ];
 
-    $form['plan_type'] = array(
+    $form['plan_type'] = [
       '#title' => $this->t('Plan type'),
       '#type' => 'select',
       '#options' => [
         'INFINITE' => 'INFINITE',
         'FIXED' => 'FIXED'
       ],
-      '#default_value' => 'INFINITE',
       '#description' => $this->t('INFINITE will never end until the client cancel the agreement. FIXED will finish on the specified amount of cycles.'),
+      '#default_value' => 'INFINITE',
       '#required' => TRUE,
-    );
+    ];
 
     $form['options_type_fixed'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Fixed plan type options'),
       '#states' => [
         'visible' => [
-          ':input[name="plan_type"]' => array('value' => 'FIXED'),
+          ':input[name="plan_type"]' => ['value' => 'FIXED'],
         ]
       ]
     ];
@@ -79,21 +79,21 @@ class PlanAddForm extends FormBase {
       '#title' => $this->t('Amount'),
     ];
 
-    $form['amount_options']['payment_amount'] = array(
+    $form['amount_options']['payment_amount'] = [
       '#title' => $this->t('Payment amount'),
       '#type' => 'number',
       '#description' => $this->t('Set the value as an integer or as a decimal (use a dot for the decimal part). '),
       '#required' => TRUE,
-    );
+    ];
 
-    $form['amount_options']['payment_currency'] = array(
+    $form['amount_options']['payment_currency'] = [
       '#title' => $this->t('Payment currency'),
       '#type' => 'select',
       '#options' => [
         'EUR' => 'EUR',
         'USD' => 'USD',
       ],
-    );
+    ];
 
     $form['amount_options']['tax'] = [
       '#title' => $this->t('Tax'),
@@ -109,10 +109,10 @@ class PlanAddForm extends FormBase {
 
     $form['frequency_options']['payment_frequency_interval'] = [
       '#title' => $this->t('Payment frequency interval'),
-      '#default_value' => 1,
       '#min' => 1,
       '#max' => 50,
       '#type' => 'number',
+      '#default_value' => 1,
       '#required' => TRUE,
     ];
 
@@ -130,11 +130,12 @@ class PlanAddForm extends FormBase {
 
     $form['actions']['#type'] = 'actions';
 
-    $form['actions']['submit'] = array(
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save'),
       '#button_type' => 'primary',
-    );
+    ];
+
     return $form;
   }
 
