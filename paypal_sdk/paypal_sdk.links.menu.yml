@@ -20,12 +20,12 @@ paypal_sdk_plan_list:
   weight: 1
 
 # PayPal agreements menu items definition
-paypal_sdk_agreement_list:
-  title: 'PayPal Agreements'
-  route_name: paypal_sdk.agreements_list
-  description: 'List of subscriptions made by users.'
-  parent: paypal_sdk.subscriptions
-  weight: 2
+#paypal_sdk_agreement_list:
+#  title: 'PayPal Agreements'
+#  route_name: paypal_sdk.agreements_list
+#  description: 'List of subscriptions made by users.'
+#  parent: paypal_sdk.subscriptions
+#  weight: 2
 
 # Paypal Configuration
 paypal_sdk.config:
