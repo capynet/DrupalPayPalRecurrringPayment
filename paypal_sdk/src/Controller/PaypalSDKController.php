@@ -309,11 +309,12 @@ class PaypalSDKController extends ControllerBase {
     $build = ['#theme' => 'paypal_sdk__agreement_link'];
     $request = Drupal::request();
     $plan_id = $request->get('id');
+    $start_date = $request->get('startDate');
 
     // We cant cache the link since it is created
     /** @var BillingAgreement $pba */
     $pba = Drupal::service('paypal.billing.agreement');
-    $url = $pba->getUserAgreementLink($plan_id);
+    $url = $pba->getUserAgreementLink($plan_id, $start_date);
 
     if ($url) {
       $build['#url'] = $url;

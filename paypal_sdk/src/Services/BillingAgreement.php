@@ -322,21 +322,39 @@ class BillingAgreement {
    * Generates a link for a new agreement.
    *
    * @param string $plan_id
+   * @param string $start_date_choice Indicates the start date concept.
    * @return bool|null|string
    */
-  function getUserAgreementLink($plan_id) {
+  function getUserAgreementLink($plan_id, $start_date_choice) {
     $originalPlan = $this->getPlan($plan_id);
 
     if (!$originalPlan) {
       return FALSE;
     }
 
-    // @fixme Since the start date is required at the "plan form" but really is not part of a paypal plan we need to figure out how to catch this value from a plan to use it here because the agreement is who really needs a starting date. Maybe we can save this start day on the plan as a "extra data"?
     $utcTimezone = new \DateTimeZone('UTC');
-    $start_date = new \DateTime('NOW', $utcTimezone);
+    $base_date = new \DateTime('NOW', $utcTimezone);
 
-    // We can not mark the start date with "NOW", so we move ti forward a few minutes.
-    $start_date->modify('+10 minutes');
+    switch ($start_date_choice) {
+      default:
+      case 'ipso_facto':
+        // We can not mark the start date with "NOW",
+        // so we move it forward a few minutes.
+        $base_date->modify('+10 minutes');
+        $start_date = $base_date;
+        break;
+      case 'first_of_month':
+        $base_date->modify('+1 months');
+        $calc_str_date = $base_date->format('Y') . '-' . $base_date->format('m') . '-01';
+        $start_date = new \DateTime($calc_str_date, $utcTimezone);
+        break;
+      case 'first_of_year':
+        $base_date->modify('+1 years');
+        $calc_str_date = $base_date->format('Y') . '-01-01';
+        $start_date = new \DateTime($calc_str_date, $utcTimezone);
+        break;
+    }
+
 
     $agreement = new Agreement();
     $agreement
@@ -354,14 +372,11 @@ class BillingAgreement {
 
     try {
       $agreement = $agreement->create($this->apiContext);
-      $approvalUrl = $agreement->getApprovalLink();
-
+      return $agreement->getApprovalLink();
     } catch (\Exception $e) {
       var_dump(json_decode($e->getData()));
       return FALSE;
     }
-
-    return $approvalUrl;
   }
 
   /**

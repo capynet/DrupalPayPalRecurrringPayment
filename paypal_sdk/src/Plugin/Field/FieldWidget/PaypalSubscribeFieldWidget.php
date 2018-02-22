@@ -92,8 +92,6 @@ class PaypalSubscribeFieldWidget extends WidgetBase {
       '#type' => 'select',
       '#options' => [
         'ipso_facto' => $this->t('Immediately'),
-        'custom_date' => $this->t('I want to specify the start date'),
-        'first_of_day' => $this->t('Tomorrow'),
         'first_of_month' => $this->t('The first day of the next month'),
         'first_of_year' => $this->t('The first day of the next year'),
       ],
