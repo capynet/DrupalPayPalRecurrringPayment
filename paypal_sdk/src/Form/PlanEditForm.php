@@ -6,6 +6,7 @@ use Drupal;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\paypal_sdk\Services\BillingAgreement;
+use Drupal\Core\Url;
 
 /**
  * Implements an example form.
@@ -162,7 +163,7 @@ class PlanEditForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // @todo implementar validaciones.
+    // @todo implement validations.
   }
 
   /**
@@ -172,12 +173,19 @@ class PlanEditForm extends FormBase {
     /** @var BillingAgreement $pba */
     $plan_id = $form_state->getBuildInfo()['args'][0];
     $pba = Drupal::service('paypal.billing.agreement');
+    $values = $form_state->getValues();
+    unset($values['submit'], $values['op'], $values['form_build_id'], $values['form_token'], $values['form_id']);
+//    $result = $pba->updatePlan($plan_id, $form_state->getValues());
+//
+//
+//    if ($result !== FALSE) {
+//      drupal_set_message($this->t('The plan <strong>@name</strong> with ID <strong>@id</strong> has been updated.', ['@name' => $result->getName(), '@id' => $result->getId()]));
+//    }
 
-    $values = [
-      'name' => $form_state->getValue('name')
-    ];
+    drupal_set_message($this->t('Sorry updates are not implemented yet.'), 'warning');
 
-    $plan = $pba->updatePlan($plan_id, $values);
+    $form_state->setRedirectUrl(Url::fromRoute('paypal_sdk.billing_plan_list'));
+
   }
 
 }

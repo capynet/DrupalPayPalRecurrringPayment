@@ -221,13 +221,13 @@ class BillingAgreement {
    * @param string $plan_id ID of the plan
    * @param array $values key value plan nuew values.
    *
+   * @todo implemebnt updates https://paypal.github.io/PayPal-PHP-SDK/sample/doc/billing/UpdatePlanPaymentDefinitions.html
    * @return bool
    */
   public function updatePlan($plan_id, $values) {
     $plan = $this->getPlan($plan_id);
 
     try {
-//      $this->setState($plan, 'CREATED');
       $patch = new Patch();
 
       $patch
@@ -238,11 +238,9 @@ class BillingAgreement {
       $patchRequest = new PatchRequest();
       $patchRequest->addPatch($patch);
       $plan->update($patchRequest, $this->apiContext);
-//      $this->setState($plan, 'ACTIVE');
-      return TRUE;
+      return $plan;
 
     } catch (\Exception $e) {
-//      $this->setState($plan, 'ACTIVE');
       return FALSE;
     }
 
