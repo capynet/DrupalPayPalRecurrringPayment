@@ -70,7 +70,7 @@ class PaypalAdminForm extends ConfigFormBase {
         '#title' => t('Client ID'),
         '#description' => 'Paypal application Client ID',
         '#maxlength' => 255,
-        '#required' => TRUE,
+//        '#required' => TRUE,
         '#default_value' => $config->get('sandbox_client_id'),
       ],
 
@@ -79,7 +79,7 @@ class PaypalAdminForm extends ConfigFormBase {
         '#title' => t('Client Secret'),
         '#description' => 'Paypal application Client Secret',
         '#maxlength' => 255,
-        '#required' => TRUE,
+//        '#required' => TRUE,
         '#default_value' => $config->get('sandbox_client_secret'),
       ]
     );
@@ -98,7 +98,7 @@ class PaypalAdminForm extends ConfigFormBase {
         '#title' => t('Client ID'),
         '#description' => 'Paypal application Client ID',
         '#maxlength' => 255,
-        '#required' => TRUE,
+//        '#required' => TRUE,
         '#default_value' => $config->get('live_client_id'),
       ],
 
@@ -107,7 +107,7 @@ class PaypalAdminForm extends ConfigFormBase {
         '#title' => t('Client Secret'),
         '#description' => 'Paypal application Client Secret',
         '#maxlength' => 255,
-        '#required' => TRUE,
+//        '#requireyd' => TRUE,
         '#default_value' => $config->get('live_client_secret'),
       ]
     ];
